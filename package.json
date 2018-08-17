@@ -1,0 +1,14 @@
+{
+  "name": "foodmap",
+  "version": "0.0.1",
+  "description": "app geolocalizar restaurantes",
+  "main": "splash.html",
+  "scripts": {
+    "test": "mocha"
+  },
+  "keywords": [
+    "restaurantes"
+  ],
+  "author": "Camili",
+  "license": "ISC"
+}
