@@ -1,59 +1,64 @@
-var marker; //variable del marcador
-var coords = {}; //coordenadas obtenidas con la geolocalización
+var map;
+var infowindow;
 
-//Funcion principal
-initMap = function() {
+navigator.geolocation.getCurrentPosition(initMap);
 
-    //usamos la API para geolocalizar el usuario
-    navigator.geolocation.getCurrentPosition(
-        function(position) {
-            coords = {
-                lng: position.coords.longitude,
-                lat: position.coords.latitude
-            };
-            setMapa(coords); //pasamos las coordenadas al metodo para crear el mapa
+function initMap(position) {
 
 
-        },
-        function(error) { console.log(error); });
-
-}
-
-
-
-function setMapa(coords) {
-    //Se crea una nueva instancia del objeto mapa
-    var map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 13,
-        center: new google.maps.LatLng(coords.lat, coords.lng),
-
+    //obtenemos coordenadas
+    let lat = position.coords.latitude;
+    let lng = position.coords.longitude;
+    let locate = { lat, lng };
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: locate,
+        zoom: 13
     });
 
-    //Creamos el marcador en el mapa con sus propiedades
-    //para nuestro obetivo tenemos que poner el atributo draggable en true
-    //position pondremos las mismas coordenas que obtuvimos en la geolocalización
-    marker = new google.maps.Marker({
-        map: map,
-        draggable: true,
-        animation: google.maps.Animation.DROP,
-        position: new google.maps.LatLng(coords.lat, coords.lng),
+    infowindow = new google.maps.InfoWindow();
+    let service = new google.maps.places.PlacesService(map);
+    service.nearbySearch({
+        location: locate, //localizacion
+        radius: 500, //radio
+        type: ["restaurant"]
+    }, callback);
 
-    });
-    //agregamos un evento al marcador junto con la funcion callback al igual que el evento dragend que indica 
-    //cuando el usuario a soltado el marcador
-    marker.addListener('click', toggleBounce);
+    function callback(results, status) {
 
-    marker.addListener('dragend', function(event) {
-        //escribimos las coordenadas de la posicion actual del marcador dentro del input #coords
-        document.getElementById("coords").value = this.getPosition().lat() + "," + this.getPosition().lng();
-    });
-}
-
-//callback al hacer clic en el marcador lo que hace es quitar y poner la animacion BOUNCE
-function toggleBounce() {
-    if (marker.getAnimation() !== null) {
-        marker.setAnimation(null);
-    } else {
-        marker.setAnimation(google.maps.Animation.BOUNCE);
+        if (status === google.maps.places.PlacesServiceStatus.OK) {
+            for (let i = 0; i < results.length; i++) {
+                createMarker(results[i]);
+                //console.log(results);
+                infoPlaces(results[i]);
+            }
+        }
     }
+
+    function infoPlaces(place) {
+        const name = place.name;
+        const radius = place.vicinity;
+        const photo = place.photos[0].getUrl({ 'maxWidth': 350, 'maxHeight': 350 });
+
+        const containerInfo = document.getElementById('imgInfo');
+        containerInfo.innerHTML += `<h4>${name}</h4><p>${radius}</p><img src='${photo}'></img>`
+            // console.log(name);
+            // console.log(radius);
+            // console.log(photo);
+    }
+
+
+    function createMarker(place) {
+        let placeLoc = place.geometry.location;
+        let marker = new google.maps.Marker({
+            map: map,
+            position: place.geometry.location
+        });
+
+        google.maps.event.addListener(marker, 'click', function() {
+            infowindow.setContent(place.name);
+
+            infowindow.open(map, this);
+        });
+    }
+
 }

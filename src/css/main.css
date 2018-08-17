@@ -1,14 +1,16 @@
 body {
+    background-color: black;
     height: 100%;
-    margin: 0;
-    padding: 0;
 }
 
 #map {
-    width: 50%;
-    height: 25%;
+    height: 200px;
+    width: 400px;
+    margin: 10px;
 }
 
-#coords {
-    width: 500px;
+#headerLogo {
+    height: 250px;
+    width: 200px;
+    margin-top: 15px;
 }
